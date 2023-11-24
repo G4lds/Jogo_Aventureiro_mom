@@ -1,12 +1,3 @@
-[gd_scene load_steps=3 format=3 uid="uid://5c5kjqvne5cl"]
+[gd_scene format=3 uid="uid://5c5kjqvne5cl"]
 
-[ext_resource type="Script" path="res://Main/Player.gd" id="1_4ny5e"]
-[ext_resource type="Script" path="res://Main/Enemy.gd" id="2_vc3sx"]
-
-[node name="Main" type="Node2D"]
-
-[node name="Player" type="Node2D" parent="."]
-script = ExtResource("1_4ny5e")
-
-[node name="Enemy" type="Node2D" parent="."]
-script = ExtResource("2_vc3sx")
+[node name="main" type="Node2D"]

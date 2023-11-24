@@ -1,11 +1,12 @@
-extends Node2D
+extends Node
+var mao = [0,0,0,0,0]
+var campo = [[0,0,0,0,0],[0,0,0,0,0]]
 
+var vida = 100
+var pontos = 5
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	var vida = 10
-	var ataque = 10
-	print("enemy starting")
 	pass # Replace with function body.
 
 

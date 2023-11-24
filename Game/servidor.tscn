@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://b2m0jqyquya42"]
+
+[ext_resource type="Script" path="res://Jogador.gd" id="1_cdp6t"]
+[ext_resource type="Script" path="res://Cartas.gd" id="2_46a87"]
+
+[node name="Servidor" type="Node2D"]
+
+[node name="Jogador_1" type="Node" parent="."]
+script = ExtResource("1_cdp6t")
+
+[node name="Jogador_2" type="Node" parent="."]
+script = ExtResource("1_cdp6t")
+
+[node name="Cartas" type="Node" parent="."]
+script = ExtResource("2_46a87")
