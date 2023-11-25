@@ -19,6 +19,7 @@ var baralho = [[
 	]]
 
 var jogadores = []
+var pronto = [false,false]
 
 
 class jogador:
@@ -57,6 +58,7 @@ class jogador:
 
 
 class carta_personagem:
+	var _modo
 	var _tipo
 	var _custo
 	var _nome
@@ -88,6 +90,7 @@ class carta_personagem:
 		descricao
 		):
 		self._tipo = tipo
+		self._modo = "defeza"
 		self._custo = custo
 		self._nome = nome
 		self._experiencia = 0
@@ -112,6 +115,10 @@ class carta_personagem:
 		return 1
 	func tipo():
 		return self._tipo
+	func modo():
+		return self._modo
+	func custo():
+		return self._custo
 	func nome():
 		return self._nome
 	func classe():
@@ -147,12 +154,15 @@ class carta_personagem:
 			return self._modificador
 	
 	func recebe_dano(tipo,dano):
-		if tipo == "normal":
-			self.dano +=  clamp(dano - self.defesa_normal(),0,999)
-		elif tipo == "magico":
-			self.dano +=  clamp(dano - self.defesa_magica(),0,999)
-		if self._dano > self._vida:
+		if self._modo == "defesa":
+			if tipo == "normal":
+				self.dano +=  clamp(dano - self.defesa_normal(),0,999)
+			elif tipo == "magico":
+				self.dano +=  clamp(dano - self.defesa_magica(),0,999)
+		else:
 			self._dano = self._vida
+		if self._dano > self._vida:
+				self._dano = self._vida
 	func recebe_modificador(atributo,valor):
 		if atributo == "vida":
 			self._modificador[0] += valor
@@ -169,7 +179,7 @@ class carta_personagem:
 		else:
 			self._modificador
 
-func importar_baralho(id):
+func desdobrar_baralho(id):
 	var x = []
 	for elm in baralho[id]:
 		x.append(carta_personagem.new(elm[0],elm[1],elm[2],elm[3],elm[4],elm[5],elm[6],elm[7],elm[8],elm[9],elm[10],elm[11]))
@@ -195,14 +205,30 @@ func move_carta(de,para):
 			de[1][de[2]] = false
 			pass
 
+func entra_jogador(nome,baralho):
+	if len(jogadores) <= 1:
+		jogadores.append(jogador.new(nome, pontos, desdobrar_baralho(baralho),campo,mao))
+		print("jogador ",len(jogadores)," (",nome,") entrou")
+
+func atacar(atacante,atacado):
+	if atacante.tipo("personagem"):
+		atacado.recebe_dano("normal",atacado)
+
+func turno():
+	if pronto[0] and pronto[1]:
+		print("turno")
+		pass
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	print("ola mundo")
-	jogadores.append(jogador.new("jorge", pontos, importar_baralho(0),campo,mao))
-	jogadores.append(jogador.new("clotildes",pontos, importar_baralho(1),campo,mao))
+	entra_jogador("jose",0)
+	entra_jogador("marta",0)
 	print("\njogadores criados")
 	print(jogadores[1]._baralho)
+	pronto = [true,true]
+	turno()
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
