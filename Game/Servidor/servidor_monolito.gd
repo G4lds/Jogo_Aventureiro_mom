@@ -7,20 +7,21 @@ const campo = [4,2]
 const mao = 5
 
 var baralho = [[
-	["personagem",5, "Deirdre de Paor" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [10,20,30], [10,20,30], [10,20,30],"Pessimista por Natureza, desde muito jovem teve que roubar para poder ter o que comer. Ele não é muito fã de conflitos, por isso costuma trabalhar de forma ágil e sorrateira."],
-	["personagem",5, "Alianna Armstrong" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [10,20,30], [10,20,30], [10,20,30],"Descricao"],
-	["personagem",5, "Elrohir" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [10,20,30], [10,20,30], [10,20,30],"Descricao"],
-	["personagem",5, "Ireti" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [10,20,30], [10,20,30], [10,20,30],"Descricao"]
+	["personagem",5, "Deirdre de Paor" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [1,20,30], [10,20,30], [10,20,30],"Pessimista por Natureza, desde muito jovem teve que roubar para poder ter o que comer. Ele não é muito fã de conflitos, por isso costuma trabalhar de forma ágil e sorrateira."],
+	["personagem",5, "Alianna Armstrong" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [2,20,30], [10,20,30], [10,20,30],"Descricao"],
+	["personagem",5, "Elrohir" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [3,20,30], [3,20,30], [10,20,30],"Descricao"],
+	["personagem",5, "Ireti" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [4,20,30], [4,20,30], [10,20,30],"Descricao"]
 	],[
-	["personagem",5, "Deirdre de Paor" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [10,20,30], [10,20,30], [10,20,30],"Pessimista por Natureza, desde muito jovem teve que roubar para poder ter o que comer. Ele não é muito fã de conflitos, por isso costuma trabalhar de forma ágil e sorrateira."],
-	["personagem",5, "Alianna Armstrong" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [10,20,30], [10,20,30], [10,20,30],"Descricao"],
-	["personagem",5, "Elrohir" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [10,20,30], [10,20,30], [10,20,30],"Descricao"],
-	["personagem",5, "Ireti" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [10,20,30], [10,20,30], [10,20,30],"Descricao"]
+	["personagem",5, "Deirdre de Paor" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [1,20,30], [10,20,30], [10,20,30],"Pessimista por Natureza, desde muito jovem teve que roubar para poder ter o que comer. Ele não é muito fã de conflitos, por isso costuma trabalhar de forma ágil e sorrateira."],
+	["personagem",5, "Alianna Armstrong" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [2,20,30], [10,20,30], [10,20,30],"Descricao"],
+	["personagem",5, "Elrohir" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [10,20,30], [3,20,30], [10,20,30],"Descricao"],
+	["personagem",5, "Ireti" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [10,20,30], [4,20,30], [10,20,30],"Descricao"]
 	]]
 
 var jogadores = []
 var pronto = [false,false]
-
+var proximos_movimentos = []
+var proximos_ataques = []
 
 class jogador:
 	var _nome
@@ -90,7 +91,7 @@ class carta_personagem:
 		descricao
 		):
 		self._tipo = tipo
-		self._modo = "defeza"
+		self._modo = "defesa"
 		self._custo = custo
 		self._nome = nome
 		self._experiencia = 0
@@ -156,13 +157,15 @@ class carta_personagem:
 	func recebe_dano(tipo,dano):
 		if self._modo == "defesa":
 			if tipo == "normal":
-				self.dano +=  clamp(dano - self.defesa_normal(),0,999)
+				self._dano +=  clamp(dano - self.defesa_normal(),0,999)
+				print("ai, recebi ", dano, " de dano, estou com ", self.vida(), "de vida")
 			elif tipo == "magico":
 				self.dano +=  clamp(dano - self.defesa_magica(),0,999)
 		else:
-			self._dano = self._vida
-		if self._dano > self._vida:
+			self._dano += dano
+		if self._dano > self._vida[nivel()] + self._modificador[0]:
 				self._dano = self._vida
+		
 	func recebe_modificador(atributo,valor):
 		if atributo == "vida":
 			self._modificador[0] += valor
@@ -211,14 +214,30 @@ func entra_jogador(nome,baralho):
 		print("jogador ",len(jogadores)," (",nome,") entrou")
 
 func atacar(atacante,atacado):
-	if atacante.tipo("personagem"):
-		atacado.recebe_dano("normal",atacado)
+	if atacante.tipo() == "personagem":
+		atacado.recebe_dano("normal",atacante.ataque())
 
 func turno():
 	if pronto[0] and pronto[1]:
 		print("turno")
 		pass
 
+func turno_combate(ataques):
+	var index = []
+	
+	# indexa
+	for i in range(len(ataques)):
+		index.append(i)
+	# ordena
+	for j in range(len(index)-1,0,-1):
+		for i in range(j):
+			if ataques[index[i]][1].velocidade() > ataques[index[i+1]][1].velocidade():
+				var temp = index[i]
+				index[i] = index[i+1]
+				index[i+1] = temp
+	for elm in index:
+		atacar(ataques[elm][1],ataques[elm][2])
+	proximos_ataques = []
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -226,9 +245,18 @@ func _ready():
 	entra_jogador("jose",0)
 	entra_jogador("marta",0)
 	print("\njogadores criados")
-	print(jogadores[1]._baralho)
-	pronto = [true,true]
-	turno()
+	proximos_ataques = [
+	["ataque",jogadores[0]._baralho[3],jogadores[1]._baralho[1]],
+	["ataque",jogadores[0]._baralho[2],jogadores[1]._baralho[2]],
+	["ataque",jogadores[0]._baralho[1],jogadores[1]._baralho[3]],
+	["ataque",jogadores[0]._baralho[0],jogadores[1]._baralho[3]],
+	["ataque",jogadores[0]._baralho[3],jogadores[1]._baralho[1]],
+	["ataque",jogadores[0]._baralho[2],jogadores[1]._baralho[2]],
+	["ataque",jogadores[0]._baralho[1],jogadores[1]._baralho[3]],
+	["ataque",jogadores[0]._baralho[0],jogadores[1]._baralho[3]]]
+	print(proximos_ataques)
+	turno_combate(proximos_ataques)
+	print(proximos_ataques)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
