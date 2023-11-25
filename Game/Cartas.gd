@@ -1,46 +1,50 @@
 extends Node
 
+const niveis = [50, 125]
 
-
-class base:
-	func _init(tipo := "", nome := "", descricao := "", custo := 1, posicao := -1):
-		self.tipo = tipo
+class carta_personagem:
+	var _nome
+	var _descricao
+	var _experiencia
+	var _classe
+	var _raca
+	var _vida
+	var _ataque
+	var _magia
+	var _velocidade
+	var _defesa_normal
+	var _defesa_magica
+	
+	func _init(
+		nome,
+		descricao,
+		classe,
+		raca,
+		vida,
+		ataque,
+		magia,
+		velocidade,
+		defesa_normal,
+		defesa_magica
+	):
 		self._nome = nome
 		self._descricao = descricao
-		self._custo = custo
-		self._position = posicao
-		
-	
-	func get_tipo():
-		pass
-	func get_nome():
-		pass
-	func get__descricao():
-		pass
-	func get_custo():
-		pass
-	func get_position():
-		pass
-	func set_position():
-		pass
-
-
-class vida:
-	func _init(vida := 0):
+		self._experiencia = 0
+		self._classe = classe
+		self._raca = raca
 		self._vida = vida
-		self._vida_p = 0
-		
-	func get_vida():
-		return self._vida - self._vida_p
-	func get_vidainicial():
-		return self._vida
-	func curaoudano(A:int):
-		self._vida_p += A
-		if self._vida < self._vida_p:
-			self._vida_p += 0
+		self._ataque = ataque
+		self._magia = magia
+		self._velocidade = velocidade
+		self._defesa_normal = defesa_normal
+		self._defesa_magica = defesa_magica
+	
+	func _nivel():
+		if self._experiencia < niveis[0]:
+			return 1
+		if self._experiencia > niveis[1]:
+			return 3
+		return 2
 
-
-class carta(base(),vida()):
-	func _init():
-		pass
-
+func _ready():
+	print("cartas entrou")
