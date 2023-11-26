@@ -1,56 +1,72 @@
-[gd_scene format=3 uid="uid://5c5kjqvne5cl"]
+[gd_scene load_steps=5 format=3 uid="uid://5c5kjqvne5cl"]
+
+[ext_resource type="Texture2D" uid="uid://bkgce6wrxlk24" path="res://Imagens/fantasy card/fantasy empty playboard.png" id="1_8440i"]
+[ext_resource type="Script" path="res://Main/Tabuleiro.gd" id="2_f4n1r"]
+[ext_resource type="Texture2D" uid="uid://b7ks4dpe373wd" path="res://Imagens/fantasy card/card fantasy back.png" id="3_hcsts"]
+[ext_resource type="Texture2D" uid="uid://jv1gdr6y0it5" path="res://Imagens/fantasy card/fantasy empty card section.png" id="4_1mdig"]
 
 [node name="main" type="Node2D"]
 
-[node name="Tabuleiro" type="ColorRect" parent="."]
-offset_right = 1155.0
-offset_bottom = 648.0
+[node name="Tabuleiro" type="Node2D" parent="."]
+position = Vector2(6, -2)
 
-[node name="Carta1" type="ColorRect" parent="."]
-offset_left = 318.0
-offset_top = 384.0
-offset_right = 523.0
-offset_bottom = 649.0
-color = Color(1, 0, 0, 1)
+[node name="Tabuleiro" type="Sprite2D" parent="Tabuleiro"]
+position = Vector2(577.75, 323)
+scale = Vector2(0.599219, 0.596296)
+texture = ExtResource("1_8440i")
+script = ExtResource("2_f4n1r")
 
-[node name="Carta2" type="ColorRect" parent="."]
-offset_left = 536.0
-offset_top = 383.0
-offset_right = 741.0
-offset_bottom = 648.0
-color = Color(1, 0, 0, 1)
+[node name="Baralho" type="Sprite2D" parent="Tabuleiro"]
+position = Vector2(129, 320)
+scale = Vector2(0.21371, 0.217517)
+texture = ExtResource("3_hcsts")
 
-[node name="Carta3" type="ColorRect" parent="."]
-offset_left = 752.0
-offset_top = 384.0
-offset_right = 957.0
-offset_bottom = 649.0
-color = Color(1, 0, 0, 1)
+[node name="CampoP" type="Sprite2D" parent="Tabuleiro"]
+position = Vector2(813.715, 324.5)
+scale = Vector2(0.608546, 0.629943)
+texture = ExtResource("4_1mdig")
 
-[node name="Baralho" type="ColorRect" parent="."]
-offset_left = 29.0
-offset_top = 185.0
-offset_right = 234.0
-offset_bottom = 450.0
-color = Color(0, 0, 1, 1)
+[node name="CemiterioP" type="Sprite2D" parent="Tabuleiro"]
+position = Vector2(1034, 616)
+scale = Vector2(0.608546, 0.629943)
+texture = ExtResource("4_1mdig")
 
-[node name="CartaEnemy1" type="ColorRect" parent="."]
-offset_left = 425.0
-offset_top = 1.0
-offset_right = 637.0
-offset_bottom = 144.0
-color = Color(1, 1, 0, 1)
+[node name="CemiterioE" type="Sprite2D" parent="Tabuleiro"]
+position = Vector2(190, 30)
+scale = Vector2(0.608546, 0.629943)
+texture = ExtResource("4_1mdig")
 
-[node name="CartaEnemy2" type="ColorRect" parent="."]
-offset_left = 642.0
-offset_top = 1.0
-offset_right = 854.0
-offset_bottom = 144.0
-color = Color(1, 1, 0, 1)
+[node name="CampoE" type="Sprite2D" parent="Tabuleiro"]
+position = Vector2(544, 320)
+scale = Vector2(0.608546, 0.629943)
+texture = ExtResource("4_1mdig")
 
-[node name="CartaEnemy3" type="ColorRect" parent="."]
-offset_left = 860.0
-offset_top = -1.0
-offset_right = 1072.0
-offset_bottom = 142.0
-color = Color(1, 1, 0, 1)
+[node name="Carta1" type="Sprite2D" parent="Tabuleiro"]
+position = Vector2(422, 643)
+scale = Vector2(0.645669, 0.652542)
+texture = ExtResource("4_1mdig")
+
+[node name="Carta2" type="Sprite2D" parent="Tabuleiro"]
+position = Vector2(592, 644)
+scale = Vector2(0.645669, 0.652542)
+texture = ExtResource("4_1mdig")
+
+[node name="Carta3" type="Sprite2D" parent="Tabuleiro"]
+position = Vector2(762, 645)
+scale = Vector2(0.645669, 0.652542)
+texture = ExtResource("4_1mdig")
+
+[node name="Enemy1" type="Sprite2D" parent="Tabuleiro"]
+position = Vector2(487, 3)
+scale = Vector2(0.21371, 0.217517)
+texture = ExtResource("3_hcsts")
+
+[node name="Enemy2" type="Sprite2D" parent="Tabuleiro"]
+position = Vector2(650, 3)
+scale = Vector2(0.21371, 0.217517)
+texture = ExtResource("3_hcsts")
+
+[node name="Enemy3" type="Sprite2D" parent="Tabuleiro"]
+position = Vector2(814, 3)
+scale = Vector2(0.21371, 0.217517)
+texture = ExtResource("3_hcsts")
