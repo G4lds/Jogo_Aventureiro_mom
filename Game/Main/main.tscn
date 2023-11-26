@@ -1,3 +1,56 @@
 [gd_scene format=3 uid="uid://5c5kjqvne5cl"]
 
 [node name="main" type="Node2D"]
+
+[node name="Tabuleiro" type="ColorRect" parent="."]
+offset_right = 1155.0
+offset_bottom = 648.0
+
+[node name="Carta1" type="ColorRect" parent="."]
+offset_left = 318.0
+offset_top = 384.0
+offset_right = 523.0
+offset_bottom = 649.0
+color = Color(1, 0, 0, 1)
+
+[node name="Carta2" type="ColorRect" parent="."]
+offset_left = 536.0
+offset_top = 383.0
+offset_right = 741.0
+offset_bottom = 648.0
+color = Color(1, 0, 0, 1)
+
+[node name="Carta3" type="ColorRect" parent="."]
+offset_left = 752.0
+offset_top = 384.0
+offset_right = 957.0
+offset_bottom = 649.0
+color = Color(1, 0, 0, 1)
+
+[node name="Baralho" type="ColorRect" parent="."]
+offset_left = 29.0
+offset_top = 185.0
+offset_right = 234.0
+offset_bottom = 450.0
+color = Color(0, 0, 1, 1)
+
+[node name="CartaEnemy1" type="ColorRect" parent="."]
+offset_left = 425.0
+offset_top = 1.0
+offset_right = 637.0
+offset_bottom = 144.0
+color = Color(1, 1, 0, 1)
+
+[node name="CartaEnemy2" type="ColorRect" parent="."]
+offset_left = 642.0
+offset_top = 1.0
+offset_right = 854.0
+offset_bottom = 144.0
+color = Color(1, 1, 0, 1)
+
+[node name="CartaEnemy3" type="ColorRect" parent="."]
+offset_left = 860.0
+offset_top = -1.0
+offset_right = 1072.0
+offset_bottom = 142.0
+color = Color(1, 1, 0, 1)
