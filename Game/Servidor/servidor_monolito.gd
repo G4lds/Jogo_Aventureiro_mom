@@ -8,16 +8,15 @@ var herois = [
 	[5,"5555",10,10,5,5,"descricao"]
 	]
 var baralhos = [[
-	[100,"equipamento","chapeu","descricao",[[0,4,0]]],
-	[101,"equipamento","bota","descricao",[[0,4,0]]],
-	[102,"buff","buff 1","descricao",[[0,4,4]]],
-	[103,"buff","buff 2","descricao",[[0,4,4]]],
-	[104,"magia","magia 1","descricao",6],
-	[104,"magia","magia 2","descricao",6]]]
+	[100,"equipamento","chapeu","descricao",[[0,2,1]],6],
+	[101,"equipamento","bota","descricao",[[0,4,1]],6],
+	[102,"buff","buff 1","descricao",[[0,4,4]],6],
+	[103,"buff","buff 2","descricao",[[0,4,4]],6],
+	[104,"magia","magia 1","descricao",6,6],
+	[104,"magia","magia 2","descricao",6,6]]]
 
 var jogadores = []
 var pronto = [false,false]
-var turno_atual = 0
 
 
 
@@ -49,6 +48,21 @@ class Jogador:
 		if len(self._mao) <= 5:
 			self._mao.append(self._baralho[0])
 			self._baralho.remove_at(0)
+	
+	func snapshot():
+		var a = [self._pontos,[],[]]
+		var b = []
+		for elm in self._mao:
+			a[1].append(elm._id)
+		for elm in self._herois:
+			a[2].append(elm.atributos()[0])
+		for i in range(len(a[2])):
+			for j in range(len(a[2][i][11])):
+				b.append(a[2][i][11][j]._id)
+				a[2][i][11]
+				
+		return a
+
 
 class Carta_heroi:
 	var _id
@@ -94,16 +108,18 @@ class Carta_heroi:
 					self._buff.remove_at(i)
 	
 	func equipar(equipamento):
-		if len(self._equipamento) >= 3:
+		if len(self._equipamento) <= 3:
+			print(len(self._equipamento))
+			print("equipando",(equipamento))
 			self._equipamento.append(equipamento)
+			print(self._equipamento)
 		else:
 			self._equipamento.remove_at(0)
 			self._equipamento.append(equipamento)
 			self._modificador[self._equipamento[0][0]] -= self._equipamento[0][1]
-		self._modificador[equipamento[0]] = equipamento[1]
 	
 	func buffar(buff):
-		self._ebuff.append(buff)
+		self._buff.append(buff)
 		self._modificador[buff[0]] = buff[1]
 	
 	func perder_vida(valor):
@@ -127,7 +143,7 @@ class Carta_heroi:
 	func defesa():
 		return self._defesa + self._modificador[3]
 
-	func  atributos():
+	func atributos():
 		return [[
 			self._id,
 			self._tipo,
@@ -165,12 +181,14 @@ class Carta_equipamento:
 	var _nome
 	var _descricao
 	var _modificador
-	func _init(id,nome,modificador,descricao):
+	var _custo
+	func _init(id,nome,descricao,modificador,custo):
 		self._id = id
 		self._tipo = "equipamento"
 		self._nome = nome
 		self._descricao = descricao
 		self._modificador = modificador
+		self._custo = custo
 	
 	func modificador():
 		return self._modificador
@@ -178,19 +196,24 @@ class Carta_equipamento:
 	func tipo():
 		return self._tipo
 	
+	func custo():
+		return self._custo
+	
 	func  atributos():
 		return [[
 			self._id,
 			self._tipo,
 			self._nome,
 			self._descricao,
-			self._modificador
+			self._modificador,
+			self._custo
 			],[
 			"id",
 			"tipo",
 			"nome",
 			"descricao",
-			"modificador"
+			"modificador",
+			"custo"
 			]]
 
 
@@ -200,12 +223,14 @@ class Carta_buff:
 	var _nome
 	var _descricao
 	var _modificador
-	func _init(id,nome,buff,descricao):
+	var _custo
+	func _init(id,nome,descricao,buff,custo):
 		self._id = id
 		self._tipo = "buff"
 		self._nome = nome
 		self._descricao = descricao
 		self._modificador = modificador
+		self._custo = custo
 	
 	func modificador():
 		return self._modificador
@@ -213,19 +238,24 @@ class Carta_buff:
 	func tipo():
 		return self._tipo
 	
+	func custo():
+		return self._custo
+	
 	func  atributos():
 		return [[
 			self._id,
 			self._tipo,
 			self._nome,
 			self._descricao,
-			self._modificador
+			self._modificador,
+			self._custo
 			],[
 			"id",
 			"tipo",
 			"nome",
 			"descricao",
-			"modificador"
+			"modificador",
+			"custo"
 			]]
 
 
@@ -235,12 +265,14 @@ class Carta_magia:
 	var _nome
 	var _ataque
 	var _descricao
-	func _init(id,nome,ataque,descricao):
+	var _custo
+	func _init(id,nome,descricao,ataque,custo):
 		self._id = id
 		self._tipo = "magia"
 		self._nome = nome
 		self._ataque = ataque
 		self._descricao = descricao
+		self._custo = custo
 	
 	func ataque():
 		return self._ataque
@@ -248,19 +280,24 @@ class Carta_magia:
 	func tipo():
 		return self._tipo
 	
+	func custo():
+		return self._custo
+	
 	func  atributos():
 		return [[
 			self._id,
 			self._tipo,
 			self._nome,
 			self._descricao,
-			self._ataque
+			self._ataque,
+			self._custo
 			],[
 			"id",
 			"tipo",
 			"nome",
 			"ataque",
-			"descricao"
+			"descricao",
+			"custo"
 			]]
 
 
@@ -269,20 +306,32 @@ func atacar_carta(atacante, atacado):
 
 func usar_carta(jogador,usada):
 	if jogador == 0:
-		if usada.tipo() == "equipamento":
-			jogadores[0]._herois[0].equipar(usada)
-		elif usada.tipo() == "buff":
-			jogadores[0]._herois[0].buffar(usada)
-		elif usada.tipo() == "magia":
-			atacar_carta(jogadores[0]._mao[usada],jogadores[1]._herois[0])
+		if jogadores[0]._mao[usada].tipo() == "equipamento":
+			if jogadores[0]._pontos >= jogadores[0]._mao[usada].custo():
+				jogadores[0]._pontos -= jogadores[0]._mao[usada].custo()
+				jogadores[0]._herois[0].equipar(jogadores[0]._mao[usada])
+		elif jogadores[0]._mao[usada].tipo() == "buff":
+			if jogadores[0]._pontos >= jogadores[0]._mao[usada].custo():
+				jogadores[0]._pontos -= jogadores[0]._mao[usada].custo()
+				jogadores[0]._herois[0].buffar(jogadores[0]._mao[usada])
+		elif jogadores[0]._mao[usada].tipo() == "magia":
+			if jogadores[0]._herois[0].magia() >= jogadores[0]._mao[usada].custo():
+				jogadores[0]._herois[0].perder_magia(jogadores[0]._mao[usada].custo())
+				atacar_carta(jogadores[0]._mao[usada],jogadores[1]._herois[0])
 		jogadores[0]._mao.remove_at(usada)
 	elif jogador == 1:
-		if usada.tipo() == "equipamento":
-			jogadores[1]._herois[0].equipar(usada)
-		elif usada.tipo() == "buff":
-			jogadores[1]._herois[0].buffar(usada)
-		elif usada.tipo() == "magia":
-			atacar_carta(jogadores[1]._mao[usada],jogadores[0]._herois[0])
+		if jogadores[1]._mao[usada].tipo() == "equipamento":
+			if jogadores[1]._pontos >= jogadores[1]._mao[usada].custo():
+				jogadores[1]._pontos -= jogadores[1]._mao[usada].custo()
+				jogadores[1]._herois[0].equipar(jogadores[1]._mao[usada])
+		elif jogadores[1]._mao[usada].tipo() == "buff":
+			if jogadores[1]._pontos >= jogadores[1]._mao[usada].custo():
+				jogadores[1]._pontos -= jogadores[1]._mao[usada].custo()
+				jogadores[1]._herois[0].buffar(jogadores[1]._mao[usada])
+		elif jogadores[1]._mao[usada].tipo() == "magia":
+			if jogadores[0]._herois[0].magia() >= jogadores[0]._mao[usada].custo():
+				jogadores[1]._herois[0].perder_magia(jogadores[1]._mao[usada].custo())
+				atacar_carta(jogadores[1]._mao[usada],jogadores[0]._herois[0])
 		jogadores[1]._mao.remove_at(usada)
 
 func desdobrar_herois(heroi):
@@ -295,35 +344,70 @@ func desdobar_baralho(baralho):
 	var x = []
 	for i in range(len(baralhos[baralho])):
 		if baralhos[baralho][i][1] == "equipamento":
-			x.append(Carta_equipamento.new(baralhos[baralho][i][0],baralhos[baralho][i][1],baralhos[baralho][i][2],baralhos[baralho][i][3]))
+			x.append(Carta_equipamento.new(baralhos[baralho][i][0],baralhos[baralho][i][2],baralhos[baralho][i][3],baralhos[baralho][i][4],baralhos[baralho][i][5]))
 		elif baralhos[baralho][i][1] == "buff":
-			x.append(Carta_buff.new(baralhos[baralho][i][0],baralhos[baralho][i][1],baralhos[baralho][i][2],baralhos[baralho][i][3]))
+			x.append(Carta_buff.new(baralhos[baralho][i][0],baralhos[baralho][i][2],baralhos[baralho][i][3],baralhos[baralho][i][4],baralhos[baralho][i][5]))
 		elif baralhos[baralho][i][1] == "magia":
-			x.append(Carta_magia.new(baralhos[baralho][i][0],baralhos[baralho][i][1],baralhos[baralho][i][2],baralhos[baralho][i][3]))
+			x.append(Carta_magia.new(baralhos[baralho][i][0],baralhos[baralho][i][2],baralhos[baralho][i][3],baralhos[baralho][i][4],baralhos[baralho][i][5]))
 	return x
 
 func entra_jogador(nome,heroi,baralho):
 	if len(jogadores) == 0:
 		jogadores.append(Jogador.new(0,nome,desdobrar_herois(heroi),desdobar_baralho(baralho)))
 	elif len(jogadores) == 1:
-		jogadores.append(Jogador.new(1,nome,heroi,baralho))
+		jogadores.append(Jogador.new(1,nome,desdobrar_herois(heroi),desdobar_baralho(baralho)))
+
+func snapshot(jogador):
+	var x = []
+	if jogador == 0:
+		x.append(jogadores[0].snapshot())
+		x.append(jogadores[1].snapshot()[1])
+	return x
+	
+
+
+
 
 func turno():
-	print("turno")
-	pass
+		jogadores[0]._herois[0].tick()
+		jogadores[1]._herois[0].tick()
+		print("turno")
+		jogadores[0].compra()
+		jogadores[1].compra()
+		jogadores[0].compra()
+		jogadores[1].compra()
+		jogadores[0].compra()
+		jogadores[1].compra()
+		jogadores[0].compra()
+		jogadores[1].compra()
+		jogadores[0].compra()
+		jogadores[1].compra()
+		print(snapshot(0))
+		usar_carta(0,0)
+		usar_carta(1,0)
+		print()
+		print(snapshot(0))
+		usar_carta(0,0)
+		usar_carta(1,0)
+		usar_carta(0,0)
+		usar_carta(1,0)
+		usar_carta(0,0)
+		usar_carta(1,0)
+		print()
+		print(snapshot(0))
+		
 
 func _ready():
-	#entra_jogador("aaaaa",[1,2,3],0)
 	print("test")
 	entra_jogador("nomeaa",[1,2,3],0)
-	entra_jogador("nomeaaa",[1,2,3],0)
+	entra_jogador("noaaaa",[1,2,3],0)
 	pronto = [true,true]
+
 	
 	
 func _process(delta):
 	if pronto == [true,true]:
 		pronto = [false,false]
 		turno()
-	pass
 	
 	
