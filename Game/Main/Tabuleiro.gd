@@ -14,6 +14,23 @@ var hand_size = 3
 # Lista de modificadores
 var modificadores = ["vida", "ataque", "magia", "velocidade", "defesa_normal", "defesa_magica"]
 
+# Estrutura de dados para representar uma carta
+var carta_heroi = {
+	"id": 1,
+	"tipo": "criatura",
+	"nome": "Exemplo",
+	"vida": 10,
+	"vida_perdida": 0,
+	"magia": 5,
+	"magia_perdida": 0,
+	"ataque": 3,
+	"defesa": 2,
+	"descricao": "Uma carta de exemplo",
+	"modificador": "nenhum",
+	"equipamento": false,
+	"buff": false
+}
+
 func _ready():
 	# Conecte os nós aos sprites 2D
 	Player[0] = get_node("Carta1")
@@ -47,6 +64,22 @@ func _ready():
 
 	for campo in CampoP[0]:
 		campo.connect("input_event", self, "_on_campo_input_event", [CampoP[0].index(campo)])
+	
+	# Adicione as cartas na mão do Player com os atributos definidos
+	for i in range(hand_size):
+		# Crie uma cópia da carta_heroi para cada carta na mão do jogador
+		var nova_carta = carta_heroi.duplicate()
+
+		# Atribua um ID único para cada carta (pode ser melhorado dependendo da sua lógica)
+		nova_carta["id"] = i + 1
+
+		# Adicione a carta à mão do Player
+		Player[3].append(nova_carta)
+
+	# Imprima o snapshot das cartas na mão do Player
+	print("Snapshot das cartas na mão do Player:")
+	for carta in Player[3]:
+		print(carta)
 
 # Função chamada quando o mouse entra na carta
 func _on_card_mouse_entered(index):
@@ -60,13 +93,11 @@ func _on_card_mouse_exited(index):
 func _on_card_input_event(viewport, event, index):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		print("Clicou na carta:", index)
-		# Implemente aqui a lógica para selecionar a carta
 
 # Função chamada quando ocorre um evento de entrada (clicar) no campo do jogador
 func _on_campo_input_event(viewport, event, index):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		print("Clicou no CampoP:", index)
-		# Implemente aqui a lógica para mover a carta para o CampoP
 
 		# Exemplo de como comprar uma carta aleatória do baralho após jogar no CampoP
 		comprar_carta(Player[3], Player[0])
