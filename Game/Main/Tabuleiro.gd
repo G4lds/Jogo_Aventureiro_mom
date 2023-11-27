@@ -128,31 +128,33 @@ func create_board(position, size, player_name, player_number):
 	player_hand_container.position = position + Vector2(0, cell_size.y * 3)  # Adicionei um espaço para a mão
 	add_child(player_hand_container)
 
-	for x in range(size.x):
-		for y in range(size.y):
-			var card_container = HBoxContainer.new()
+	for y in range(size.y):
+		var card_container = HBoxContainer.new()
 
-			# Adiciona o container ao campo ou à mão do jogador
-			if x < hand_size:
-				player_hand_container.add_child(card_container)
-			else:
-				player_field_container.add_child(card_container)
+		# Adiciona o container ao campo ou à mão do jogador
+		if y < hand_size:
+			player_hand_container.add_child(card_container)
+		else:
+			player_field_container.add_child(card_container)
 
-			var card_sprite = Sprite2D.new()
-			card_sprite.rect_min_size = cell_size
-			card_container.add_child(card_sprite)
+		var card_panel = Panel.new()  # Use Panel ou Control
+		card_container.add_child(card_panel)
 
-			# Adiciona uma carta ao baralho do jogador
-			if player_number == 1:
-				Player[0].append("Carta " + str(x + y * size.x))
-			elif player_number == 2:
-				Enemy[0].append("Carta " + str(x + y * size.x))
+		var card_sprite = Sprite2D.new()
+		card_sprite.rect_min_size = cell_size
+		card_panel.add_child(card_sprite)
 
-			# Adiciona a lista de modificadores à carta
-			if player_number == 1:
-				Player[1].append(modificadores)
-			elif player_number == 2:
-				Enemy[1].append(modificadores)
+		# Adiciona uma carta ao baralho do jogador
+		if player_number == 1:
+			Player[0].append("Carta " + str(y * size.x))
+		elif player_number == 2:
+			Enemy[0].append("Carta " + str(y * size.x))
+
+		# Adiciona a lista de modificadores à carta
+		if player_number == 1:
+			Player[1].append(modificadores)
+		elif player_number == 2:
+			Enemy[1].append(modificadores)
 
 # Distribui cartas para o jogador
 func distribuir_cartas(quantidade, mao, baralho):
