@@ -18,7 +18,8 @@ var baralhos = [[
 var jogadores = []
 var pronto = [false,false]
 
-
+var clientes = []
+var servidor
 
 class Jogador:
 	var _id
@@ -339,7 +340,7 @@ func desdobrar_herois(heroi):
 	for i in range(3):
 		x.append(Carta_heroi.new(herois[heroi[i]][0],herois[heroi[i]][1],herois[heroi[i]][2],herois[heroi[i]][3],herois[heroi[i]][4],herois[heroi[i]][5],herois[heroi[i]][6]))
 	return x
-	
+
 func desdobar_baralho(baralho):
 	var x = []
 	for i in range(len(baralhos[baralho])):
@@ -363,51 +364,68 @@ func snapshot(jogador):
 		x.append(jogadores[0].snapshot())
 		x.append(jogadores[1].snapshot()[1])
 	return x
-	
-
-
-
 
 func turno():
 		jogadores[0]._herois[0].tick()
 		jogadores[1]._herois[0].tick()
 		print("turno")
-		jogadores[0].compra()
-		jogadores[1].compra()
-		jogadores[0].compra()
-		jogadores[1].compra()
-		jogadores[0].compra()
-		jogadores[1].compra()
-		jogadores[0].compra()
-		jogadores[1].compra()
-		jogadores[0].compra()
-		jogadores[1].compra()
-		print(snapshot(0))
-		usar_carta(0,0)
-		usar_carta(1,0)
-		print()
-		print(snapshot(0))
-		usar_carta(0,0)
-		usar_carta(1,0)
-		usar_carta(0,0)
-		usar_carta(1,0)
-		usar_carta(0,0)
-		usar_carta(1,0)
-		print()
-		print(snapshot(0))
-		
+		atacar_carta(jogadores[0]._herois[0],jogadores[1]._herois[0])
+		atacar_carta(jogadores[1]._herois[0],jogadores[0]._herois[0])
+		jogadores[0].ciclar()
+		jogadores[1].ciclar()
 
 func _ready():
-	print("test")
-	entra_jogador("nomeaa",[1,2,3],0)
-	entra_jogador("noaaaa",[1,2,3],0)
-	pronto = [true,true]
+	servidor = TCPServer.new()
+	var resultado = servidor.listen(12345)
 
-	
-	
+	if resultado == OK:
+		print("Servidor ouvindo na porta 12345")
+	else:
+		print("Erro ao iniciar o servidor: ", servidor.get_error())
+
 func _process(delta):
 	if pronto == [true,true]:
 		pronto = [false,false]
 		turno()
-	
-	
+		
+	# nova conexao
+	if servidor.is_connection_available():
+		if len(clientes) <= 2:
+			var cliente = servidor.take_connection()
+			print("Cliente conectado: ", cliente.get_packet_ip())
+
+			# adiciona um novo cliente
+			clientes.append(cliente)
+		if len(clientes) == 1:
+			jogadores.append(Jogador.new(0,"jogador1",desdobrar_herois([1,2,3]),desdobar_baralho(0)))
+		else:
+			jogadores.append(Jogador.new(1,"jogador2",desdobrar_herois([1,2,3]),desdobar_baralho(0)))
+			
+	# recebe dados dos clientes
+	for cliente in clientes:
+		if cliente.get_available_packet_count() > 0:
+			# recebe dados do client
+			var dados = cliente.get_packet()
+			print("Dados recebidos do cliente: ", dados)
+			
+			if cliente == clientes[0]:
+				if dados[0] == "turno":
+					pronto[0] == true
+				elif dados[0] == "usar_carta":
+					usar_carta(0,dados[1])
+				elif dados[0] == "ciclar":
+					jogadores[0].ciclar()
+				elif dados[0] == "compra":
+					jogadores[0].compra()
+			else:
+				if dados[0] == "turno":
+					pronto[1] == true
+				elif dados[0] == "usar_carta":
+					usar_carta(1,dados[1])
+				elif dados[0] == "ciclar":
+					jogadores[1].ciclar()
+				elif dados[0] == "compra":
+					jogadores[1].compra()
+					
+			servidor.send_packet(clientes[0],snapshot(0))
+			servidor.send_packet(clientes[1],snapshot(1))
