@@ -1,264 +1,329 @@
 extends Node2D
 
-
-const pontos = 10
-const niveis = [50, 125]
-const campo = [4,2]
-const mao = 5
-
-var baralho = [[
-	["personagem",5, "Deirdre de Paor" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [1,20,30], [10,20,30], [10,20,30],"Pessimista por Natureza, desde muito jovem teve que roubar para poder ter o que comer. Ele não é muito fã de conflitos, por isso costuma trabalhar de forma ágil e sorrateira."],
-	["personagem",5, "Alianna Armstrong" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [2,20,30], [10,20,30], [10,20,30],"Descricao"],
-	["personagem",5, "Elrohir" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [3,20,30], [3,20,30], [10,20,30],"Descricao"],
-	["personagem",5, "Ireti" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [4,20,30], [4,20,30], [10,20,30],"Descricao"]
-	],[
-	["personagem",5, "Deirdre de Paor" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [1,20,30], [10,20,30], [10,20,30],"Pessimista por Natureza, desde muito jovem teve que roubar para poder ter o que comer. Ele não é muito fã de conflitos, por isso costuma trabalhar de forma ágil e sorrateira."],
-	["personagem",5, "Alianna Armstrong" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [2,20,30], [10,20,30], [10,20,30],"Descricao"],
-	["personagem",5, "Elrohir" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [10,20,30], [3,20,30], [10,20,30],"Descricao"],
-	["personagem",5, "Ireti" , "ladrao", "humano", [20,35,50], [10,20,30], [10,20,30], [10,20,30], [4,20,30], [10,20,30],"Descricao"]
-	]]
+var herois = [
+	[1,"1111",10,10,5,5,"descricao"],
+	[2,"2222",10,10,5,5,"descricao"],
+	[3,"3333",10,10,5,5,"descricao"],
+	[4,"4444",10,10,5,5,"descricao"],
+	[5,"5555",10,10,5,5,"descricao"]
+	]
+var baralhos = [[
+	[100,"equipamento","chapeu","descricao",[[0,4,0]]],
+	[101,"equipamento","bota","descricao",[[0,4,0]]],
+	[102,"buff","buff 1","descricao",[[0,4,4]]],
+	[103,"buff","buff 2","descricao",[[0,4,4]]],
+	[104,"magia","magia 1","descricao",6],
+	[104,"magia","magia 2","descricao",6]]]
 
 var jogadores = []
 var pronto = [false,false]
-var proximos_movimentos = []
-var proximos_ataques = []
+var turno_atual = 0
 
-class jogador:
+
+
+class Jogador:
+	var _id
 	var _nome
 	var _pontos
-	var _pontos_total
-	var _cemiterio
-	var _baralho
-	var _campo
 	var _mao
-	func _init(nome,pontos,baralho,limite_campo,limite_mao):
+	var _herois
+	var _baralho
+	var _cemiterio
+	func _init(id,nome,herois,baralho):
+		self._id = id
 		self._nome = nome
-		self._pontos = pontos
-		self._pontos_total = pontos
-		self._cemiterio = []
-		self._baralho = baralho
-		self._campo = []
+		self._pontos = 10
 		self._mao = []
-		_desdobrar_campo(limite_campo) 
-		_desdobrar_mao(limite_mao)
-		
-	func _desdobrar_campo(limite_campo):
-		for i in range(limite_campo[0]* limite_campo[1]):
-			self._campo.append(false)
-	func _desdobrar_mao(limite_mao):
-		for i in range(limite_mao):
-			self._mao.append(false)
+		self._herois = herois
+		self._baralho = baralho
+		self._cemiterio = []
+	
+	func ciclar():
+		if self._herois[0].vida() <= 0:
+			self._cemiterio.append(self._herois[0])
+		elif len(self._herois) > 1:
+			self._herois.append(self._herois[0])
+		self._herois.remove_at(0)
+	
+	func compra():
+		if len(self._mao) <= 5:
+			self._mao.append(self._baralho[0])
+			self._baralho.remove_at(0)
 
-	func adicionar_pontos(pontos):
-		self._pontos = clamp(self._pontos + pontos,0,self._pontos_total)
-	func gastar_pontos(pontos):
-		if pontos <= self._pontos:
-			self._pontos -= pontos
-		else:
-			return -1
-
-
-class carta_personagem:
-	var _modo
+class Carta_heroi:
+	var _id
 	var _tipo
-	var _custo
 	var _nome
-	var _experiencia
-	var _classe
-	var _raca
 	var _vida
-	var _dano
-	var _ataque
+	var _vida_perdida
 	var _magia
-	var _velocidade
-	var _defesa_normal
-	var _defesa_magica
+	var _magia_perdida
+	var _ataque
+	var _defesa
 	var _descricao
 	var _modificador
-	
-	func _init(
-		tipo,
-		custo,
-		nome,
-		classe,
-		raca,
-		vida,
-		ataque,
-		magia,
-		velocidade,
-		defesa_normal,
-		defesa_magica,
-		descricao
-		):
-		self._tipo = tipo
-		self._modo = "defesa"
-		self._custo = custo
+	var _equipamento
+	var _buff
+	func _init(id,nome,vida,ataque,magia,defesa,descricao):
+		self._id = id
+		self._tipo = "heroi"
 		self._nome = nome
-		self._experiencia = 0
-		self._classe = classe
-		self._raca = raca
 		self._vida = vida
-		self._dano = 0
-		self._ataque = ataque
+		self._vida_perdida = 0
 		self._magia = magia
-		self._velocidade = velocidade
-		self._defesa_normal = defesa_normal
-		self._defesa_magica = defesa_magica
+		self._magia_perdida = 0
+		self._ataque = ataque
+		self._defesa = defesa
 		self._descricao = descricao
-		self._modificador = [0,0,0,0,0,0]
-
-	# retorna os valores dos status
-	func nivel():
-		if self._experiencia < niveis[0]:
-			return 0
-		if self._experiencia > niveis[1]:
-			return 2
-		return 1
+		self._modificador = [0,0,0,0]
+		self._equipamento = []
+		self._buff = []
+		
+	func tick():
+		# atualiza os modificadores
+		self._modificador = [0,0,0,0]
+		for elm1 in self._equipamento:
+			for elm in elm1:
+				self._modificador[elm[0]] += elm[1]
+		for j in range(len(self._buff)):
+			for i in range(len(self._buff[j])):
+				if self._buff[j][i][2] > 0:
+					self._modificador[self._buff[j][i][0]] += self._buff[j][i][1]
+					self._buff[j][i][2] += -1
+				else:
+					self._buff.remove_at(i)
+	
+	func equipar(equipamento):
+		if len(self._equipamento) >= 3:
+			self._equipamento.append(equipamento)
+		else:
+			self._equipamento.remove_at(0)
+			self._equipamento.append(equipamento)
+			self._modificador[self._equipamento[0][0]] -= self._equipamento[0][1]
+		self._modificador[equipamento[0]] = equipamento[1]
+	
+	func buffar(buff):
+		self._ebuff.append(buff)
+		self._modificador[buff[0]] = buff[1]
+	
+	func perder_vida(valor):
+		self._vida_perdida += clamp(valor - self.defesa(),0,self.vida())
+	
+	func perder_magia(valor):
+		self._magia_perdida -= clamp(valor,0,self._magia)
+	
 	func tipo():
 		return self._tipo
-	func modo():
-		return self._modo
-	func custo():
-		return self._custo
-	func nome():
-		return self._nome
-	func classe():
-		return self._classe
-	func vida():
-		return self._vida[self.nivel()] + self._modificador[0] - self._dano
-	func ataque():
-		return self._ataque[self.nivel()] + self._modificador[1]
-	func magia():
-		return self._magia[self.nivel()] + self._modificador[2]
-	func velocidade():
-		return self._velocidade[self.nivel()] + self._modificador[3]
-	func defesa_normal():
-		return self._defesa_normal[self.nivel()] + self._modificador[4]
-	func defesa_magica():
-		return self._defesa_magica[self.nivel()] + self._modificador[5]
-	func descricao():
-		return self._descricao
-	func modificador(atributo):
-		if atributo == "vida":
-			return self._modificador[0]
-		elif atributo == "ataque":
-			return self._modificador[1]
-		elif atributo == "magia":
-			return self._modificador[2]
-		elif atributo == "velocidade":
-			return self._modificador[3]
-		elif atributo == "defesa_normal":
-			return self._modificador[4]
-		elif atributo == "defesa_magica":
-			return self._modificador[5]
-		else:
-			return self._modificador
 	
-	func recebe_dano(tipo,dano):
-		if self._modo == "defesa":
-			if tipo == "normal":
-				self._dano +=  clamp(dano - self.defesa_normal(),0,999)
-				print("ai, recebi ", dano, " de dano, estou com ", self.vida(), "de vida")
-			elif tipo == "magico":
-				self.dano +=  clamp(dano - self.defesa_magica(),0,999)
-		else:
-			self._dano += dano
-		if self._dano > self._vida[nivel()] + self._modificador[0]:
-				self._dano = self._vida
-		
-	func recebe_modificador(atributo,valor):
-		if atributo == "vida":
-			self._modificador[0] += valor
-		elif atributo == "ataque":
-			self._modificador[1] += valor
-		elif atributo == "magia":
-			self._modificador[2] += valor
-		elif atributo == "velocidade":
-			self._modificador[3] += valor
-		elif atributo == "defesa_normal":
-			self._modificador[4] += valor
-		elif atributo == "defesa_magica":
-			self._modificador[5] += valor
-		else:
-			self._modificador
+	func vida():
+		return self._vida + self._modificador[0] - self._vida_perdida
+	
+	func magia():
+		return self._magia + self._modificador[1] - self._magia_perdida
+	
+	func ataque():
+		return self._ataque + self._modificador[2]
+	
+	func defesa():
+		return self._defesa + self._modificador[3]
 
-func desdobrar_baralho(id):
+	func  atributos():
+		return [[
+			self._id,
+			self._tipo,
+			self._nome,
+			self._vida,
+			self._vida_perdida,
+			self._magia,
+			self._magia_perdida,
+			self._ataque,
+			self._defesa,
+			self._descricao,
+			self._modificador,
+			self._equipamento,
+			self._buff
+			],[
+			"id",
+			"tipo",
+			"nome",
+			"vida",
+			"vida_perdida",
+			"magia",
+			"magia_perdida",
+			"ataque",
+			"defesa",
+			"descricao",
+			"modificador",
+			"equipamento",
+			"buff"
+			]]
+
+
+class Carta_equipamento:
+	var _id
+	var _tipo
+	var _nome
+	var _descricao
+	var _modificador
+	func _init(id,nome,modificador,descricao):
+		self._id = id
+		self._tipo = "equipamento"
+		self._nome = nome
+		self._descricao = descricao
+		self._modificador = modificador
+	
+	func modificador():
+		return self._modificador
+	
+	func tipo():
+		return self._tipo
+	
+	func  atributos():
+		return [[
+			self._id,
+			self._tipo,
+			self._nome,
+			self._descricao,
+			self._modificador
+			],[
+			"id",
+			"tipo",
+			"nome",
+			"descricao",
+			"modificador"
+			]]
+
+
+class Carta_buff:
+	var _id
+	var _tipo
+	var _nome
+	var _descricao
+	var _modificador
+	func _init(id,nome,buff,descricao):
+		self._id = id
+		self._tipo = "buff"
+		self._nome = nome
+		self._descricao = descricao
+		self._modificador = modificador
+	
+	func modificador():
+		return self._modificador
+	
+	func tipo():
+		return self._tipo
+	
+	func  atributos():
+		return [[
+			self._id,
+			self._tipo,
+			self._nome,
+			self._descricao,
+			self._modificador
+			],[
+			"id",
+			"tipo",
+			"nome",
+			"descricao",
+			"modificador"
+			]]
+
+
+class Carta_magia:
+	var _id
+	var _tipo
+	var _nome
+	var _ataque
+	var _descricao
+	func _init(id,nome,ataque,descricao):
+		self._id = id
+		self._tipo = "magia"
+		self._nome = nome
+		self._ataque = ataque
+		self._descricao = descricao
+	
+	func ataque():
+		return self._ataque
+	
+	func tipo():
+		return self._tipo
+	
+	func  atributos():
+		return [[
+			self._id,
+			self._tipo,
+			self._nome,
+			self._descricao,
+			self._ataque
+			],[
+			"id",
+			"tipo",
+			"nome",
+			"ataque",
+			"descricao"
+			]]
+
+
+func atacar_carta(atacante, atacado):
+	atacado.perder_vida(atacante.ataque)
+
+func usar_carta(jogador,usada):
+	if jogador == 0:
+		if usada.tipo() == "equipamento":
+			jogadores[0]._herois[0].equipar(usada)
+		elif usada.tipo() == "buff":
+			jogadores[0]._herois[0].buffar(usada)
+		elif usada.tipo() == "magia":
+			atacar_carta(jogadores[0]._mao[usada],jogadores[1]._herois[0])
+		jogadores[0]._mao.remove_at(usada)
+	elif jogador == 1:
+		if usada.tipo() == "equipamento":
+			jogadores[1]._herois[0].equipar(usada)
+		elif usada.tipo() == "buff":
+			jogadores[1]._herois[0].buffar(usada)
+		elif usada.tipo() == "magia":
+			atacar_carta(jogadores[1]._mao[usada],jogadores[0]._herois[0])
+		jogadores[1]._mao.remove_at(usada)
+
+func desdobrar_herois(heroi):
 	var x = []
-	for elm in baralho[id]:
-		x.append(carta_personagem.new(elm[0],elm[1],elm[2],elm[3],elm[4],elm[5],elm[6],elm[7],elm[8],elm[9],elm[10],elm[11]))
+	for i in range(3):
+		x.append(Carta_heroi.new(herois[heroi[i]][0],herois[heroi[i]][1],herois[heroi[i]][2],herois[heroi[i]][3],herois[heroi[i]][4],herois[heroi[i]][5],herois[heroi[i]][6]))
+	return x
+	
+func desdobar_baralho(baralho):
+	var x = []
+	for i in range(len(baralhos[baralho])):
+		if baralhos[baralho][i][1] == "equipamento":
+			x.append(Carta_equipamento.new(baralhos[baralho][i][0],baralhos[baralho][i][1],baralhos[baralho][i][2],baralhos[baralho][i][3]))
+		elif baralhos[baralho][i][1] == "buff":
+			x.append(Carta_buff.new(baralhos[baralho][i][0],baralhos[baralho][i][1],baralhos[baralho][i][2],baralhos[baralho][i][3]))
+		elif baralhos[baralho][i][1] == "magia":
+			x.append(Carta_magia.new(baralhos[baralho][i][0],baralhos[baralho][i][1],baralhos[baralho][i][2],baralhos[baralho][i][3]))
 	return x
 
-func move_carta(de,para):
-	# [ tipo, lista, posicao ]
-	# [0,x,x] = cemiterio/baralho
-	# [1,x,x]  = campo/mao
-	if de[0] == 0 and para[0] == 0:
-		para[1].append(de[1][de[2]])
-		de[1].remove_at(de[2])
-	elif de[0] == 0 and para[0] == 1:
-		if para[1][para[2]] == false:
-			para[1][para[2]] = de[1][de[2]]
-			de[1].remove_at(de[2])
-	elif de[0] == 1 and para[0] == 0:
-		para[1].append(de[1][de[2]])
-		de[1][de[2]] = false
-	elif de[0] == 1 and para[0] == 1:
-		if para[1][para[2]] == false:
-			para[1][para[2]] = de[1][de[2]]
-			de[1][de[2]] = false
-			pass
-
-func entra_jogador(nome,baralho):
-	if len(jogadores) <= 1:
-		jogadores.append(jogador.new(nome, pontos, desdobrar_baralho(baralho),campo,mao))
-		print("jogador ",len(jogadores)," (",nome,") entrou")
-
-func atacar(atacante,atacado):
-	if atacante.tipo() == "personagem":
-		atacado.recebe_dano("normal",atacante.ataque())
+func entra_jogador(nome,heroi,baralho):
+	if len(jogadores) == 0:
+		jogadores.append(Jogador.new(0,nome,desdobrar_herois(heroi),desdobar_baralho(baralho)))
+	elif len(jogadores) == 1:
+		jogadores.append(Jogador.new(1,nome,heroi,baralho))
 
 func turno():
-	if pronto[0] and pronto[1]:
-		print("turno")
-		pass
-
-func turno_combate(ataques):
-	var index = []
-	
-	# indexa
-	for i in range(len(ataques)):
-		index.append(i)
-	# ordena
-	for j in range(len(index)-1,0,-1):
-		for i in range(j):
-			if ataques[index[i]][1].velocidade() > ataques[index[i+1]][1].velocidade():
-				var temp = index[i]
-				index[i] = index[i+1]
-				index[i+1] = temp
-	for elm in index:
-		atacar(ataques[elm][1],ataques[elm][2])
-	proximos_ataques = []
-
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	print("ola mundo")
-	entra_jogador("jose",0)
-	entra_jogador("marta",0)
-	print("\njogadores criados")
-	proximos_ataques = [
-	["ataque",jogadores[0]._baralho[3],jogadores[1]._baralho[1]],
-	["ataque",jogadores[0]._baralho[2],jogadores[1]._baralho[2]],
-	["ataque",jogadores[0]._baralho[1],jogadores[1]._baralho[3]],
-	["ataque",jogadores[0]._baralho[0],jogadores[1]._baralho[3]],
-	["ataque",jogadores[0]._baralho[3],jogadores[1]._baralho[1]],
-	["ataque",jogadores[0]._baralho[2],jogadores[1]._baralho[2]],
-	["ataque",jogadores[0]._baralho[1],jogadores[1]._baralho[3]],
-	["ataque",jogadores[0]._baralho[0],jogadores[1]._baralho[3]]]
-	print(proximos_ataques)
-	turno_combate(proximos_ataques)
-	print(proximos_ataques)
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
+	print("turno")
 	pass
+
+func _ready():
+	#entra_jogador("aaaaa",[1,2,3],0)
+	print("test")
+	entra_jogador("nomeaa",[1,2,3],0)
+	entra_jogador("nomeaaa",[1,2,3],0)
+	pronto = [true,true]
+	
+	
+func _process(delta):
+	if pronto == [true,true]:
+		pronto = [false,false]
+		turno()
+	pass
+	
+	
